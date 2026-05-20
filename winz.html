@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="My Wins"/>
+<title>My Wins</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#141414;color:#f0efec;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;padding-bottom:120px}
+nav{display:flex;background:#1f1f1f;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:100}
+.nb{flex:1;padding:13px 2px;font-size:11px;font-weight:500;color:#888780;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:inherit}
+.nb.on{color:#f0efec;border-bottom-color:#f0efec}
+.pg{display:none;padding:16px}
+.pg.on{display:block}
+h1{font-size:26px;font-weight:300;margin-bottom:4px}
+.sub{font-size:13px;color:#888780;margin-bottom:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.tile{background:#1f1f1f;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px}
+.tlbl{font-size:11px;color:#888780;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.tval{font-size:22px;font-weight:500}
+.tval.green{color:#4ecca3}
+.ratebar{display:flex;align-items:center;gap:10px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:13px;color:#888780}
+.ratebar input{background:#141414;border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:6px 8px;color:#f0efec;font-size:14px;width:72px;font-family:inherit}
+.slbl{font-size:11px;font-weight:600;color:#888780;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.card{background:#1f1f1f;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:10px}
+.chead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.cico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.cname{font-size:14px;font-weight:500}
+.cpts{font-size:12px;color:#888780}
+.prow{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.pbtn{flex:1;text-align:left;background:#242424;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:11px 12px;font-size:13px;color:#f0efec;cursor:pointer;font-family:inherit;transition:transform .15s,background .15s}
+.pbtn:active{transform:scale(0.96);background:#2e2e2e}
+.ptag{font-size:12px;font-weight:600;padding:6px 10px;border-radius:8px;white-space:nowrap;min-width:40px;text-align:center}
+.custrow{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06)}
+.custrow input[type=text]{flex:1;background:#141414;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:9px 12px;color:#f0efec;font-size:13px;font-family:inherit}
+.custrow input[type=number]{width:56px;background:#141414;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:9px 8px;color:#f0efec;font-size:13px;font-family:inherit}
+.custrow button{background:#f0efec;color:#141414;border:none;border-radius:8px;padding:9px 14px;font-size:17px;cursor:pointer;font-weight:600}
+.custrow button:active{opacity:.8}
+/* bonuses */
+.bclaim{background:#0d2e25;border:1px solid #0F6E56;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#4ecca3;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bcard{background:#1f1f1f;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.bico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.binfo{flex:1;min-width:0}
+.bname{font-size:13px;font-weight:500;margin-bottom:3px}
+.bprog{font-size:11px;color:#888780;margin-bottom:5px}
+.bbar{height:3px;background:rgba(255,255,255,0.08);border-radius:99px}
+.bfill{height:3px;border-radius:99px;transition:width .3s}
+.bpts{font-size:13px;font-weight:600;white-space:nowrap}
+.logbtn{font-size:12px;padding:6px 12px;border-radius:8px;font-family:inherit;font-weight:500;cursor:pointer}
+.clmbtn{background:#0F6E56;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+/* history */
+.litem{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#1f1f1f;border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-bottom:6px}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ldesc{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbadge{font-size:11px;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.ldate{font-size:11px;color:#888780;white-space:nowrap}
+.lpts{font-size:12px;font-weight:600;white-space:nowrap}
+.ldel{background:none;border:none;font-size:18px;color:#888780;cursor:pointer;padding:2px 6px;flex-shrink:0}
+.ldel:active{color:#f87171}
+.empty{text-align:center;padding:32px 16px;color:#888780;font-size:14px}
+/* report */
+.rmeta input,.rmeta select{width:100%;background:#141414;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:9px 12px;color:#f0efec;font-size:14px;font-family:inherit;margin-bottom:12px}
+.rmeta label{font-size:12px;color:#888780;display:block;margin-bottom:4px}
+.genbtn{width:100%;padding:13px;background:#f0efec;color:#141414;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:16px;font-family:inherit}
+.rrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px}
+.rrow:last-child{border-bottom:none}
+.rtotal{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px}
+.ramount{font-size:32px;font-weight:600;color:#4ecca3}
+/* settings */
+.sbtn{width:100%;padding:11px;font-size:14px;font-family:inherit;font-weight:500;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);margin-bottom:0}
+/* undo */
+.undo{position:fixed;bottom:16px;left:16px;right:16px;background:#2c2c2c;color:white;font-size:13px;padding:12px 16px;border-radius:12px;z-index:999;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.6);transform:translateY(80px);transition:transform .25s;pointer-events:none}
+.undo.show{transform:translateY(0);pointer-events:all}
+.undo button{background:rgba(255,255,255,.15);border:none;color:white;font-size:12px;font-family:inherit;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer}
+.undo button:active{background:rgba(255,255,255,.28)}
+select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:9px 12px;color:#f0efec;font-size:14px;font-family:inherit;width:100%;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<nav>
+  <button class="nb on" onclick="go('log',this)">Log</button>
+  <button class="nb" onclick="go('bonuses',this)">Bonuses</button>
+  <button class="nb" onclick="go('history',this)">History</button>
+  <button class="nb" onclick="go('report',this)">Report</button>
+  <button class="nb" onclick="go('settings',this)">Settings</button>
+</nav>
+
+<!-- LOG -->
+<div class="pg on" id="pg-log">
+  <h1>Today's wins</h1>
+  <div class="sub" id="today-lbl"></div>
+  <div class="grid2">
+    <div class="tile"><div class="tlbl">All-time pts</div><div class="tval" id="s-all">0</div></div>
+    <div class="tile"><div class="tlbl">This week</div><div class="tval" id="s-week">0</div></div>
+    <div class="tile"><div class="tlbl">Day streak</div><div class="tval" id="s-streak">0</div></div>
+    <div class="tile"><div class="tlbl">Bonus earned</div><div class="tval green" id="s-money">₪0.00</div></div>
+  </div>
+  <div class="ratebar">
+    <span>1 point =</span>
+    <input type="number" id="rate-inp" value="1" min="0.01" step="0.01" oninput="setRate(this.value)"/>
+    <span>₪</span>
+  </div>
+  <div class="slbl">Log a win</div>
+
+  <!-- SPORTS -->
+  <div class="card">
+    <div class="chead">
+      <div class="cico" style="background:#0d2e25">🏃</div>
+      <div><div class="cname">Sports</div><div class="cpts" id="cp-sports">0 pts earned</div></div>
+    </div>
+    <div class="prow"><button class="pbtn" onclick="add('sports','Full workout',3,this)">Full workout</button><span class="ptag" style="background:#0d2e25;color:#4ecca3">+3</span></div>
+    <div class="prow"><button class="pbtn" onclick="add('sports','Walk / light activity',1,this)">Walk / light activity</button><span class="ptag" style="background:#0d2e25;color:#4ecca3">+1</span></div>
+    <div class="custrow">
+      <input type="text" id="ct-sports" placeholder="Other win…"/>
+      <input type="number" id="cp2-sports" value="1" min="1"/>
+      <button onclick="addCustom('sports')">+</button>
+    </div>
+  </div>
+
+  <!-- NUTRITION -->
+  <div class="card">
+    <div class="chead">
+      <div class="cico" style="background:#2e1f08">🥗</div>
+      <div><div class="cname">Nutrition</div><div class="cpts" id="cp-nutrition">0 pts earned</div></div>
+    </div>
+    <div class="prow"><button class="pbtn" onclick="add('nutrition','No junk food ordered today',1,this)">No junk food ordered today</button><span class="ptag" style="background:#2e1f08;color:#e8a44a">+1</span></div>
+    <div class="prow"><button class="pbtn" onclick="add('nutrition','Cooked / handled own meals',1,this)">Cooked / handled own meals</button><span class="ptag" style="background:#2e1f08;color:#e8a44a">+1</span></div>
+    <div class="custrow">
+      <input type="text" id="ct-nutrition" placeholder="Other win…"/>
+      <input type="number" id="cp2-nutrition" value="1" min="1"/>
+      <button onclick="addCustom('nutrition')">+</button>
+    </div>
+  </div>
+
+  <!-- CREATIVITY -->
+  <div class="card">
+    <div class="chead">
+      <div class="cico" style="background:#1e1b3a">🎨</div>
+      <div><div class="cname">Creativity</div><div class="cpts" id="cp-creativity">0 pts earned</div></div>
+    </div>
+    <div class="prow"><button class="pbtn" onclick="add('creativity','Painted / worked on artwork',2,this)">Painted / worked on artwork</button><span class="ptag" style="background:#1e1b3a;color:#9b93f5">+2</span></div>
+    <div class="prow"><button class="pbtn" onclick="add('creativity','Meaningful writing',2,this)">Meaningful writing</button><span class="ptag" style="background:#1e1b3a;color:#9b93f5">+2</span></div>
+    <div class="custrow">
+      <input type="text" id="ct-creativity" placeholder="Other win…"/>
+      <input type="number" id="cp2-creativity" value="1" min="1"/>
+      <button onclick="addCustom('creativity')">+</button>
+    </div>
+  </div>
+
+  <!-- BASIC FUNCTIONING -->
+  <div class="card">
+    <div class="chead">
+      <div class="cico" style="background:#0d2035">🏠</div>
+      <div><div class="cname">Basic functioning</div><div class="cpts" id="cp-life">0 pts earned</div></div>
+    </div>
+    <div class="prow"><button class="pbtn" onclick="add('life','Cleaning / laundry / groceries',1,this)">Cleaning / laundry / groceries</button><span class="ptag" style="background:#0d2035;color:#5aaaf5">+1</span></div>
+    <div class="prow"><button class="pbtn" onclick="add('life','Left the house despite mood',1,this)">Left the house despite mood</button><span class="ptag" style="background:#0d2035;color:#5aaaf5">+1</span></div>
+    <div class="custrow">
+      <input type="text" id="ct-life" placeholder="Other win…"/>
+      <input type="number" id="cp2-life" value="1" min="1"/>
+      <button onclick="addCustom('life')">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- BONUSES -->
+<div class="pg" id="pg-bonuses">
+  <h1>Weekly bonuses</h1>
+  <div class="sub" id="week-lbl"></div>
+  <div id="bonus-area"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="pg" id="pg-history">
+  <h1>Activity log</h1>
+  <div class="sub" id="hist-lbl"></div>
+  <select id="hist-month" onchange="renderHistory()"></select>
+  <div id="hist-list"></div>
+</div>
+
+<!-- REPORT -->
+<div class="pg" id="pg-report">
+  <h1>Bonus report</h1>
+  <div class="sub">Share directly with your boss</div>
+  <div class="card rmeta">
+    <label>Your name</label>
+    <input type="text" id="r-name" placeholder="e.g. David Cohen"/>
+    <label>Month</label>
+    <select id="r-month"></select>
+    <label>Notes (optional)</label>
+    <input type="text" id="r-notes" placeholder="e.g. building consistent habits"/>
+  </div>
+  <button class="genbtn" onclick="genReport()">Generate report</button>
+  <div id="report-out"></div>
+  <div id="share-btn-wrap" style="display:none;margin-top:10px">
+    <button class="genbtn" style="background:#0F6E56;color:white" onclick="shareReport()">📤 Share report</button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="pg" id="pg-settings">
+  <h1>Settings</h1>
+  <div class="sub">Backup & restore</div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;margin-bottom:4px">📤 Export backup</div>
+    <div style="font-size:13px;color:#888780;margin-bottom:14px;line-height:1.5">Save all your data as a file. Do this monthly.</div>
+    <button class="sbtn" onclick="exportData()" style="background:#f0efec;color:#141414;border-color:#f0efec">Download backup file</button>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div style="font-size:14px;font-weight:500;margin-bottom:4px">📥 Import backup</div>
+    <div style="font-size:13px;color:#888780;margin-bottom:14px;line-height:1.5">Restore from a previously saved file.</div>
+    <label style="display:block;text-align:center;padding:11px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;cursor:pointer;font-size:14px;font-weight:500">
+      Choose backup file
+      <input type="file" accept=".json" onchange="importData(this)" style="display:none"/>
+    </label>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div style="font-size:14px;font-weight:500;margin-bottom:4px">🗑️ Clear all data</div>
+    <div style="font-size:13px;color:#888780;margin-bottom:14px;line-height:1.5">Permanently delete all entries.</div>
+    <button class="sbtn" onclick="clearData()" style="background:#2e0d0d;color:#f87171;border-color:#7f1d1d">Clear all data</button>
+  </div>
+</div>
+
+<!-- UNDO PILL -->
+<div class="undo" id="undo-pill">
+  <span style="font-size:15px">✓</span>
+  <span id="undo-txt" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+  <span id="undo-pts" style="font-weight:600;opacity:.7"></span>
+  <button onclick="undoLast()">Undo</button>
+</div>
+
+<script>
+var CATS = {
+  sports:    {name:'Sports',          color:'#0F6E56',bg:'#0d2e25',tc:'#4ecca3'},
+  nutrition: {name:'Nutrition',       color:'#854F0B',bg:'#2e1f08',tc:'#e8a44a'},
+  creativity:{name:'Creativity',      color:'#534AB7',bg:'#1e1b3a',tc:'#9b93f5'},
+  life:      {name:'Basic functioning',color:'#185FA5',bg:'#0d2035',tc:'#5aaaf5'}
+};
+
+var entries = [], rate = 1, undoTimer = null;
+try { entries = JSON.parse(localStorage.getItem('wt5_e')||'[]'); } catch(e){}
+try { rate = parseFloat(localStorage.getItem('wt5_r')||'1'); } catch(e){}
+
+function save() {
+  try { localStorage.setItem('wt5_e', JSON.stringify(entries)); localStorage.setItem('wt5_r', rate); } catch(e){}
+}
+
+function fmtISO(d) { return d.toLocaleDateString('en-CA'); }
+function fmtDisp(d) { return new Date(d+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function today() { return fmtISO(new Date()); }
+function mkey(d) { return d.slice(0,7); }
+function mLabel(k) { var p=k.split('-'); return new Date(+p[0],+p[1]-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'}); }
+
+function weekDays() {
+  var d=new Date(), day=d.getDay(), mon=new Date(d);
+  mon.setDate(d.getDate()-(day===0?6:day-1)); mon.setHours(0,0,0,0);
+  var s=new Set();
+  for(var i=0;i<7;i++){ var x=new Date(mon); x.setDate(mon.getDate()+i); s.add(fmtISO(x)); }
+  return s;
+}
+
+function totalPts() { return entries.reduce(function(s,e){return s+e.pts;},0); }
+function weekPts()  { var w=weekDays(); return entries.filter(function(e){return w.has(e.date);}).reduce(function(s,e){return s+e.pts;},0); }
+function streak() {
+  if(!entries.length) return 0;
+  var days=[...new Set(entries.map(function(e){return e.date;}))].sort().reverse();
+  var sc=0, cur=today();
+  for(var i=0;i<days.length;i++){
+    if(days[i]===cur){sc++;var dt=new Date(days[i]);dt.setDate(dt.getDate()-1);cur=fmtISO(dt);}
+    else if(days[i]<cur) break;
+  }
+  return sc;
+}
+
+function bonusProg(id) {
+  var w=weekDays();
+  if(id==='no_delivery'){
+    var s=new Set(entries.filter(function(e){return e.cat==='nutrition'&&e.desc==='No junk food ordered today'&&w.has(e.date);}).map(function(e){return e.date;}));
+    return {cur:s.size,max:7};
+  }
+  if(id==='workouts3'){
+    var s=new Set(entries.filter(function(e){return e.cat==='sports'&&e.desc==='Full workout'&&w.has(e.date);}).map(function(e){return e.date;}));
+    return {cur:Math.min(s.size,3),max:3};
+  }
+  return {cur:0,max:1};
+}
+function isClaimed(id){ return entries.some(function(e){return e.cat==='bonus_auto'&&e.desc===id;}); }
+function isUnlocked(id){ var p=bonusProg(id); return p.cur>=p.max; }
+
+function updateStats() {
+  var tp=totalPts();
+  document.getElementById('s-all').textContent=tp;
+  document.getElementById('s-week').textContent=weekPts();
+  document.getElementById('s-streak').textContent=streak();
+  document.getElementById('s-money').textContent='₪'+(tp*rate).toFixed(2);
+  // update cat pts
+  Object.keys(CATS).forEach(function(id){
+    var el=document.getElementById('cp-'+id);
+    if(el) el.textContent=entries.filter(function(e){return e.cat===id;}).reduce(function(s,e){return s+e.pts;},0)+' pts earned';
+  });
+}
+
+function showUndo(desc, pts) {
+  document.getElementById('undo-txt').textContent=desc;
+  document.getElementById('undo-pts').textContent=pts>0?'+'+pts+'pt':'';
+  var p=document.getElementById('undo-pill');
+  p.classList.add('show');
+  if(undoTimer) clearTimeout(undoTimer);
+  undoTimer=setTimeout(function(){p.classList.remove('show');},4000);
+}
+
+function add(catId, desc, pts, btn) {
+  var cat=CATS[catId]||{name:'Bonus',color:'#639922',bg:'#1a2e0d',tc:'#7ed45a'};
+  entries.push({cat:catId,desc:desc,pts:pts,date:today(),catName:cat.name,color:cat.color,bg:cat.bg,tc:cat.tc});
+  save(); updateStats(); showUndo(desc,pts);
+  if(btn){
+    btn.style.background=cat.bg; btn.style.color=cat.tc; btn.style.borderColor=cat.color;
+    setTimeout(function(){btn.style.background='';btn.style.color='';btn.style.borderColor='';},600);
+  }
+}
+
+function addCustom(catId) {
+  var di=document.getElementById('ct-'+catId), pi=document.getElementById('cp2-'+catId);
+  var desc=di.value.trim(), pts=parseInt(pi.value);
+  if(!desc||isNaN(pts)||pts<1) return;
+  add(catId,desc,pts,null); di.value=''; pi.value='1';
+}
+
+function undoLast() {
+  entries.pop(); save(); updateStats();
+  var p=document.getElementById('undo-pill'); p.classList.remove('show');
+  if(undoTimer) clearTimeout(undoTimer);
+}
+
+function deleteEntry(i) { entries.splice(i,1); save(); updateStats(); renderHistory(); }
+
+function claimBonus(id) {
+  if(isClaimed(id)) return;
+  var BDATA={no_delivery:{name:'Full week no food deliveries',pts:5},workouts3:{name:'3 workouts this week',pts:3}};
+  var b=BDATA[id];
+  entries.push({cat:'bonus_auto',desc:id,pts:b.pts,date:today(),catName:'Bonus',color:'#639922',bg:'#1a2e0d',tc:'#7ed45a',display:b.name});
+  save(); updateStats(); showUndo(b.name,b.pts); renderBonuses();
+}
+
+function renderBonuses() {
+  var BONUSES=[
+    {id:'no_delivery',name:'Full week, no food deliveries',pts:5,icon:'🚫',color:'#854F0B',bg:'#2e1f08',tc:'#e8a44a'},
+    {id:'workouts3',name:'3 workouts in a week',pts:3,icon:'🏆',color:'#0F6E56',bg:'#0d2e25',tc:'#4ecca3'},
+  ];
+  var w=getWeek();
+  document.getElementById('week-lbl').textContent=w.start+' – '+w.end;
+  var html='';
+  BONUSES.forEach(function(b){
+    var p=bonusProg(b.id), pct=Math.round((p.cur/p.max)*100), claimed=isClaimed(b.id), unlocked=isUnlocked(b.id);
+    if(unlocked&&!claimed){
+      html+='<div class="bclaim"><span>🎉 <strong>'+b.name+'</strong> — +'+b.pts+' pts ready!</span><button class="clmbtn" onclick="claimBonus(\''+b.id+'\')">Claim</button></div>';
+    }
+  });
+  BONUSES.forEach(function(b){
+    var p=bonusProg(b.id), pct=Math.round((p.cur/p.max)*100), claimed=isClaimed(b.id), unlocked=isUnlocked(b.id);
+    html+='<div class="bcard"><div class="bico" style="background:'+b.bg+'">'+b.icon+'</div><div class="binfo"><div class="bname">'+b.name+'</div><div class="bprog">'+p.cur+' / '+p.max+' this week'+(claimed?' · claimed!':'')+'</div><div class="bbar"><div class="bfill" style="width:'+pct+'%;background:'+b.color+'"></div></div></div><div class="bpts" style="color:'+(unlocked?b.color:'#444')+'">'+( claimed?'✓':'+'+b.pts+'pt')+'</div></div>';
+  });
+  // art bonus
+  var n=entries.filter(function(e){return e.cat==='bonus_art';}).length;
+  html+='<div class="bcard"><div class="bico" style="background:#1e1b3a">🖼️</div><div class="binfo"><div class="bname">Finished a meaningful painting</div><div class="bprog">Personal milestone · '+n+' logged</div></div><button class="logbtn" onclick="add(\'bonus_art\',\'Finished a meaningful painting\',0,null)" style="background:#1e1b3a;color:#9b93f5;border:1px solid #534AB7">Log</button></div>';
+  document.getElementById('bonus-area').innerHTML=html;
+}
+
+function getWeek(){
+  var d=new Date(), day=d.getDay(), mon=new Date(d);
+  mon.setDate(d.getDate()-(day===0?6:day-1));
+  var sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  return {start:mon.toLocaleDateString('en-US',{month:'short',day:'numeric'}),end:sun.toLocaleDateString('en-US',{month:'short',day:'numeric'})};
+}
+
+function allMonths(){
+  var months=[...new Set(entries.map(function(e){return mkey(e.date);}))].sort().reverse();
+  var cur=mkey(today());
+  if(months.indexOf(cur)<0) months.unshift(cur);
+  return months;
+}
+
+function populateSelects(){
+  var months=allMonths(), cur=mkey(today());
+  ['hist-month','r-month'].forEach(function(id){
+    var sel=document.getElementById(id), prev=sel.value||cur;
+    sel.innerHTML=months.map(function(m){return '<option value="'+m+'"'+(m===prev?' selected':'')+'>'+mLabel(m)+'</option>';}).join('');
+    if(months.indexOf(prev)<0) sel.value=months[0];
+  });
+}
+
+function renderHistory(){
+  populateSelects();
+  var sel=document.getElementById('hist-month').value;
+  var filtered=entries.filter(function(e){return mkey(e.date)===sel;});
+  document.getElementById('hist-lbl').textContent=filtered.length+' entries · '+mLabel(sel);
+  if(!filtered.length){document.getElementById('hist-list').innerHTML='<div class="empty">No entries for this month yet.</div>';return;}
+  document.getElementById('hist-list').innerHTML=filtered.slice().reverse().map(function(e){
+    var i=entries.indexOf(e);
+    return '<div class="litem"><div class="ldot" style="background:'+e.color+'"></div><div class="ldesc">'+(e.display||e.desc)+'</div><span class="lbadge" style="background:'+e.bg+';color:'+e.tc+'">'+e.catName+'</span><span class="ldate">'+fmtDisp(e.date)+'</span><span class="lpts" style="color:'+e.color+'">'+(e.pts>0?'+'+e.pts:'·')+'</span><button class="ldel" onclick="deleteEntry('+i+')">×</button></div>';
+  }).join('');
+}
+
+function genReport(){
+  var name=document.getElementById('r-name').value||'—';
+  var sel=document.getElementById('r-month').value;
+  var notes=document.getElementById('r-notes').value;
+  var me=entries.filter(function(e){return mkey(e.date)===sel;});
+  var tp=me.reduce(function(s,e){return s+e.pts;},0);
+  var bonPts=me.filter(function(e){return e.cat==='bonus_auto';}).reduce(function(s,e){return s+e.pts;},0);
+  var money=(tp*rate).toFixed(2);
+  var catRows=Object.keys(CATS).map(function(id){
+    var cp=me.filter(function(e){return e.cat===id;}).reduce(function(s,e){return s+e.pts;},0);
+    var cnt=me.filter(function(e){return e.cat===id;}).length;
+    return '<div class="rrow"><span style="color:#888780">'+CATS[id].name+'</span><span style="font-weight:500;color:'+CATS[id].color+'">'+cp+' pts · '+cnt+' wins</span></div>';
+  }).join('');
+  var logRows=me.filter(function(e){return e.cat!=='bonus_auto';}).slice().reverse().map(function(e){
+    return '<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start"><div style="width:6px;height:6px;border-radius:50%;background:'+e.color+';margin-top:5px;flex-shrink:0"></div><div style="flex:1"><div style="font-size:13px">'+(e.display||e.desc)+'</div><div style="font-size:11px;color:#888780">'+e.catName+' · '+fmtDisp(e.date)+'</div></div><div style="font-size:12px;font-weight:600;color:'+e.color+';white-space:nowrap">'+(e.pts>0?'+'+e.pts+'pt':'·')+'</div></div>';
+  }).join('');
+  document.getElementById('report-out').innerHTML=
+    '<div class="card"><div style="font-size:20px;font-weight:400;margin-bottom:4px">'+name+'</div><div style="font-size:13px;color:#888780;margin-bottom:16px">Wellness bonus report · '+mLabel(sel)+'</div>'+
+    '<div class="rrow"><span style="color:#888780">Base points</span><span style="font-weight:500">'+(tp-bonPts)+' pts</span></div>'+
+    '<div class="rrow"><span style="color:#888780">Weekly bonuses</span><span style="font-weight:500">+'+bonPts+' pts</span></div>'+
+    '<div class="rrow"><span style="color:#888780">Total points</span><span style="font-weight:500">'+tp+' pts</span></div>'+
+    '<div class="rrow"><span style="color:#888780">Point value</span><span style="font-weight:500">₪'+rate+' per point</span></div>'+
+    (notes?'<div class="rrow"><span style="color:#888780">Notes</span><span style="font-weight:500">'+notes+'</span></div>':'')+
+    '<div class="rtotal"><span style="color:#888780;font-size:14px">Total bonus earned</span><span class="ramount">₪'+money+'</span></div></div>'+
+    '<div class="card"><div style="font-size:17px;font-weight:500;margin-bottom:14px">By category</div>'+catRows+'</div>'+
+    '<div class="card"><div style="font-size:17px;font-weight:500;margin-bottom:14px">Win log</div>'+logRows+'</div>';
+  document.getElementById('share-btn-wrap').style.display='block';
+  document.getElementById('report-out').scrollIntoView({behavior:'smooth'});
+  // store report text for sharing
+  window._reportText = buildReportText(name, mLabel(sel), tp, bonPts, money, notes, me);
+}
+
+function buildReportText(name, period, tp, bonPts, money, notes, me) {
+  var lines = [];
+  lines.push('🏆 WELLNESS BONUS REPORT');
+  lines.push(name + ' · ' + period);
+  lines.push('');
+  lines.push('📊 SUMMARY');
+  lines.push('Base points: ' + (tp-bonPts) + ' pts');
+  lines.push('Weekly bonuses: +' + bonPts + ' pts');
+  lines.push('Total: ' + tp + ' pts');
+  lines.push('💰 Bonus earned: ₪' + money);
+  if(notes) lines.push('Notes: ' + notes);
+  lines.push('');
+  lines.push('📁 BY CATEGORY');
+  Object.keys(CATS).forEach(function(id){
+    var cp=me.filter(function(e){return e.cat===id;}).reduce(function(s,e){return s+e.pts;},0);
+    var cnt=me.filter(function(e){return e.cat===id;}).length;
+    if(cp>0) lines.push(CATS[id].name+': '+cp+' pts ('+cnt+' wins)');
+  });
+  lines.push('');
+  lines.push('✅ WIN LOG');
+  me.filter(function(e){return e.cat!=='bonus_auto';}).forEach(function(e){
+    lines.push('· ['+e.catName+'] '+(e.desc)+(e.pts>0?' +'+e.pts+'pt':'')+' — '+fmtDisp(e.date));
+  });
+  return lines.join('\n');
+}
+
+function shareReport() {
+  var text = window._reportText || 'No report generated yet.';
+  if(navigator.share) {
+    navigator.share({title:'Wellness Bonus Report', text:text})
+      .catch(function(){});
+  } else {
+    // Fallback: copy to clipboard
+    if(navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function(){
+        alert('Report copied to clipboard! Paste it into WhatsApp or email.');
+      });
+    } else {
+      var ta=document.createElement('textarea');
+      ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('Report copied! Paste it into WhatsApp or email.');
+    }
+  }
+}
+
+function exportData(){
+  var data=JSON.stringify({entries:entries,rate:rate,exported:new Date().toISOString()},null,2);
+  var blob=new Blob([data],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='my-wins-backup-'+mLabel(mkey(today())).replace(' ','-')+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function importData(inp){
+  var file=inp.files[0]; if(!file) return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      if(!Array.isArray(d.entries)) throw 0;
+      if(!confirm('Import '+d.entries.length+' entries? Replaces current data.')) return;
+      entries=d.entries; rate=parseFloat(d.rate)||rate;
+      document.getElementById('rate-inp').value=rate;
+      save(); updateStats(); renderBonuses(); renderHistory(); populateSelects();
+    }catch(e){alert('Invalid backup file.');}
+  };
+  r.readAsText(file); inp.value='';
+}
+
+function clearData(){
+  if(!confirm('Delete ALL entries? Export a backup first!')) return;
+  entries=[]; save(); updateStats(); renderBonuses(); renderHistory();
+}
+
+function setRate(v){ rate=parseFloat(v)||1; save(); updateStats(); }
+
+function go(id, btn){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pg-'+id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='bonuses') renderBonuses();
+  if(id==='history') renderHistory();
+  if(id==='report'||id==='history') populateSelects();
+}
+
+// Init
+document.getElementById('rate-inp').value=rate;
+document.getElementById('today-lbl').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+updateStats();
+renderBonuses();
+populateSelects();
+</script>
+</body>
+</html>
