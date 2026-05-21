@@ -265,9 +265,9 @@ function syncToSheet() {
   fetch(SYNC_URL, {
     method: 'POST',
     body: snapshot,
-    headers: {'Content-Type': 'text/plain'}
-  }).then(function(r) { return r.json(); })
-    .then(function() {
+    headers: {'Content-Type': 'text/plain'},
+    mode: 'no-cors'
+  }).then(function() {
       syncing = false;
       showSyncStatus('Synced ✓', '#4ecca3');
       setTimeout(function(){ showSyncStatus(''); }, 3000);
