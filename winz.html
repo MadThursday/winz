@@ -275,15 +275,22 @@ function loadFromSheet() {
   fetch(SYNC_URL)
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      if (data.entries && data.entries.length > 0) {
+      if (data.entries && Array.isArray(data.entries)) {
         entries = data.entries;
-        save();
+        rate = parseFloat(data.rate) || rate;
+        try { localStorage.setItem('wt5_e', JSON.stringify(entries)); localStorage.setItem('wt5_r', rate); } catch(e){}
+        document.getElementById('rate-inp').value = rate;
         updateStats(); renderBonuses(); renderHistory(); populateSelects();
+        showSyncStatus('Loaded ✓', '#4ecca3');
+      } else {
+        showSyncStatus('', '');
       }
-      showSyncStatus('Loaded ✓', '#4ecca3');
       setTimeout(function(){ showSyncStatus(''); }, 3000);
     })
-    .catch(function() { showSyncStatus('Load failed', '#f87171'); });
+    .catch(function() {
+      showSyncStatus('Offline — using local data', '#888780');
+      setTimeout(function(){ showSyncStatus(''); }, 4000);
+    });
 }
 try { entries = JSON.parse(localStorage.getItem('wt5_e')||'[]'); } catch(e){}
 try { rate = parseFloat(localStorage.getItem('wt5_r')||'1'); } catch(e){}
