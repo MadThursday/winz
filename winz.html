@@ -247,7 +247,9 @@ var CATS = {
   life:      {name:'Basic functioning',color:'#185FA5',bg:'#0d2035',tc:'#5aaaf5'}
 };
 
-var SYNC_URL = 'https://script.google.com/macros/s/AKfycbzRKjeAppRGqd4RcVPe8PNSHJxhPgV3KMt_XkhriM5TW2b_vxVhyRjCsQ9gbkV1sDVk/exec';
+var SUPABASE_URL = 'https://lrcftqslmtaevobsqlsh.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyY2Z0cXNsbXRhZXZvYnNxbHNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNTY3NzcsImV4cCI6MjA5NDkzMjc3N30.xts7teZn9FmY08wHc4_QOOwNGnfy_Im_5zQ7cTMxkQM';
+var ROW_ID = '00000000-0000-0000-0000-000000000001';
 var entries = [], rate = 1, undoTimer = null, syncing = false, syncPending = false;
 
 function showSyncStatus(msg, color) {
@@ -261,40 +263,45 @@ function syncToSheet() {
   if (syncing) { syncPending = true; return; }
   syncing = true; syncPending = false;
   showSyncStatus('Syncing…', '#e8a44a');
-  var snapshot = JSON.stringify({action: 'save', entries: entries, rate: rate});
-  fetch(SYNC_URL, {
-    method: 'POST',
-    body: snapshot,
-    headers: {'Content-Type': 'text/plain'},
-    mode: 'no-cors'
-  }).then(function() {
-      syncing = false;
+  fetch(SUPABASE_URL + '/rest/v1/entries?id=eq.' + ROW_ID, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({data: {entries: entries, rate: rate}})
+  }).then(function(r) {
+    syncing = false;
+    if (r.ok) {
       showSyncStatus('Synced ✓', '#4ecca3');
       setTimeout(function(){ showSyncStatus(''); }, 3000);
       if (syncPending) syncToSheet();
-    })
-    .catch(function() {
-      syncing = false;
-      showSyncStatus('Sync failed — retrying…', '#f87171');
-      setTimeout(function(){ syncToSheet(); }, 4000);
-    });
+    } else { showSyncStatus('Sync failed', '#f87171'); }
+  }).catch(function() {
+    syncing = false;
+    showSyncStatus('Sync failed — retrying…', '#f87171');
+    setTimeout(function(){ syncToSheet(); }, 4000);
+  });
 }
 
 function loadFromSheet() {
   showSyncStatus('Loading…', '#e8a44a');
-  fetch(SYNC_URL)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.entries && Array.isArray(data.entries)) {
-        entries = data.entries;
-        rate = parseFloat(data.rate) || rate;
-        try { localStorage.setItem('wt5_e', JSON.stringify(entries)); localStorage.setItem('wt5_r', rate); } catch(e){}
-        document.getElementById('rate-inp').value = rate;
-        updateStats(); renderBonuses(); renderHistory(); populateSelects();
+  fetch(SUPABASE_URL + '/rest/v1/entries?id=eq.' + ROW_ID + '&select=data', {
+    headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}
+  }).then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].data) {
+        var d = rows[0].data;
+        if (d.entries && Array.isArray(d.entries)) {
+          entries = d.entries; rate = parseFloat(d.rate) || rate;
+          try { localStorage.setItem('wt5_e', JSON.stringify(entries)); localStorage.setItem('wt5_r', rate); } catch(e){}
+          document.getElementById('rate-inp').value = rate;
+          updateStats(); renderBonuses(); renderHistory(); populateSelects();
+        }
         showSyncStatus('Loaded ✓', '#4ecca3');
-      } else {
-        showSyncStatus('', '');
-      }
+      } else { showSyncStatus('', ''); }
       setTimeout(function(){ showSyncStatus(''); }, 3000);
     })
     .catch(function() {
