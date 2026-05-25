@@ -100,6 +100,17 @@ select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:
     <div class="tile"><div class="tlbl">Day streak</div><div class="tval" id="s-streak">0</div></div>
     <div class="tile"><div class="tlbl">Bonus earned</div><div class="tval green" id="s-money">₪0.00</div></div>
   </div>
+  <div class="mprog-wrap">
+    <div class="mprog-top">
+      <div>
+        <div class="mprog-label">This month's progress</div>
+        <div class="mprog-pts"><span id="mprog-pts">0</span> <span style="font-size:14px;color:#888780">pts</span></div>
+      </div>
+      <div class="mprog-money" id="mprog-money">₪0.00</div>
+    </div>
+    <div class="mprog-track"><div class="mprog-fill" id="mprog-fill" style="width:0%"></div></div>
+    <div class="mprog-ticks"><span>0</span><span id="mprog-mid"></span><span id="mprog-goal"></span></div>
+  </div>
   <div class="ratebar">
     <span>1 point =</span>
     <input type="number" id="rate-inp" value="1" min="0.01" step="0.01" oninput="setRate(this.value)"/>
@@ -166,6 +177,32 @@ select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:
       <button onclick="addCustom('life')">+</button>
     </div>
   </div>
+  <!-- THERAPY -->
+  <div class="card">
+    <div class="chead">
+      <div class="cico" style="background:#2a1a2e">🧠</div>
+      <div><div class="cname">Therapy &amp; Treatment</div><div class="cpts" id="cp-therapy">0 pts earned</div></div>
+    </div>
+    <div class="prow"><button class="pbtn" onclick="add('therapy','Therapy / treatment session',4,this)">Therapy / treatment session</button><span class="ptag" style="background:#2a1a2e;color:#c084fc">+4</span></div>
+    <div class="custrow">
+      <input type="text" id="ct-therapy" placeholder="Other win…"/>
+      <input type="number" id="cp2-therapy" value="1" min="1"/>
+      <button onclick="addCustom('therapy')">+</button>
+    </div>
+  </div>
+  <!-- MEDITATION -->
+  <div class="card">
+    <div class="chead">
+      <div class="cico" style="background:#1a2a2a">🧘</div>
+      <div><div class="cname">Meditation</div><div class="cpts" id="cp-meditation">0 pts earned</div></div>
+    </div>
+    <div class="prow"><button class="pbtn" onclick="add('meditation','Meditated today',2,this)">Meditated today</button><span class="ptag" style="background:#1a2a2a;color:#5eead4">+2</span></div>
+    <div class="custrow">
+      <input type="text" id="ct-meditation" placeholder="Other win…"/>
+      <input type="number" id="cp2-meditation" value="1" min="1"/>
+      <button onclick="addCustom('meditation')">+</button>
+    </div>
+  </div>
 </div>
 
 <!-- BONUSES -->
@@ -225,9 +262,22 @@ select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:
     </label>
   </div>
   <div class="card" style="margin-top:10px">
-    <div style="font-size:14px;font-weight:500;margin-bottom:4px">🗑️ Clear all data</div>
-    <div style="font-size:13px;color:#888780;margin-bottom:14px;line-height:1.5">Permanently delete all entries.</div>
-    <button class="sbtn" onclick="clearData()" style="background:#2e0d0d;color:#f87171;border-color:#7f1d1d">Clear all data</button>
+    <div style="font-size:14px;font-weight:500;margin-bottom:4px">🗓️ New month reset</div>
+    <div style="font-size:13px;color:#888780;margin-bottom:14px;line-height:1.5">Export a backup first, then clear all entries for the new month.</div>
+    <button class="sbtn" onclick="showReset()" style="background:#2e0d0d;color:#f87171;border-color:#7f1d1d">New month — clear all</button>
+  </div>
+</div>
+
+<!-- RESET CONFIRM OVERLAY -->
+<div class="reset-confirm" id="reset-overlay">
+  <div class="reset-box">
+    <h2>⚠️ Start new month?</h2>
+    <p>This will permanently delete all entries. Export a backup first!<br><br>Type <strong>RESET</strong> below to confirm.</p>
+    <input class="reset-input" id="reset-input" type="text" placeholder="type RESET" oninput="checkReset(this)" autocomplete="off" autocorrect="off" autocapitalize="off"/>
+    <div class="reset-btns">
+      <button class="reset-cancel" onclick="hideReset()">Cancel</button>
+      <button class="reset-go" id="reset-go-btn" onclick="doReset()" disabled>Delete everything</button>
+    </div>
   </div>
 </div>
 
@@ -244,7 +294,9 @@ var CATS = {
   sports:    {name:'Sports',          color:'#0F6E56',bg:'#0d2e25',tc:'#4ecca3'},
   nutrition: {name:'Nutrition',       color:'#854F0B',bg:'#2e1f08',tc:'#e8a44a'},
   creativity:{name:'Creativity',      color:'#534AB7',bg:'#1e1b3a',tc:'#9b93f5'},
-  life:      {name:'Basic functioning',color:'#185FA5',bg:'#0d2035',tc:'#5aaaf5'}
+  life:      {name:'Basic functioning',color:'#185FA5',bg:'#0d2035',tc:'#5aaaf5'},
+  therapy:   {name:'Therapy & Treatment',color:'#7c3aed',bg:'#2a1a2e',tc:'#c084fc'},
+  meditation:{name:'Meditation',color:'#0d9488',bg:'#1a2a2a',tc:'#5eead4'}
 };
 
 var SUPABASE_URL = 'https://lrcftqslmtaevobsqlsh.supabase.co';
@@ -365,11 +417,19 @@ function updateStats() {
   document.getElementById('s-week').textContent=weekPts();
   document.getElementById('s-streak').textContent=streak();
   document.getElementById('s-money').textContent='₪'+(tp*rate).toFixed(2);
-  // update cat pts
   Object.keys(CATS).forEach(function(id){
     var el=document.getElementById('cp-'+id);
     if(el) el.textContent=entries.filter(function(e){return e.cat===id;}).reduce(function(s,e){return s+e.pts;},0)+' pts earned';
   });
+  var mon=mkey(today());
+  var mpts=entries.filter(function(e){return mkey(e.date)===mon;}).reduce(function(s,e){return s+e.pts;},0);
+  var goal=Math.max(60,Math.ceil(mpts/20)*20+20);
+  var pct=Math.min(100,Math.round(mpts/goal*100));
+  document.getElementById('mprog-pts').textContent=mpts;
+  document.getElementById('mprog-money').textContent='₪'+(mpts*rate).toFixed(2);
+  document.getElementById('mprog-fill').style.width=pct+'%';
+  document.getElementById('mprog-goal').textContent=goal+'pts goal';
+  document.getElementById('mprog-mid').textContent=Math.round(goal/2)+'';
 }
 
 function showUndo(desc, pts) {
@@ -576,7 +636,11 @@ function importData(inp){
   r.readAsText(file); inp.value='';
 }
 
-function clearData(){
+function showReset(){ document.getElementById('reset-overlay').classList.add('show'); document.getElementById('reset-input').value=''; document.getElementById('reset-go-btn').disabled=true; document.getElementById('reset-go-btn').classList.remove('active'); }
+function hideReset(){ document.getElementById('reset-overlay').classList.remove('show'); }
+function checkReset(inp){ var ok=inp.value.toUpperCase()==='RESET'; document.getElementById('reset-go-btn').disabled=!ok; document.getElementById('reset-go-btn').classList.toggle('active',ok); }
+function doReset(){ hideReset(); entries=[]; save(); updateStats(); renderBonuses(); renderHistory(); populateSelects(); alert('Done! All entries cleared. Have a great new month 🎉'); }
+function clearData_unused(){
   if(!confirm('Delete ALL entries? Export a backup first!')) return;
   entries=[]; save(); updateStats(); renderBonuses(); renderHistory();
 }
