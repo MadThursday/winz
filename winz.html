@@ -48,6 +48,26 @@ h1{font-size:26px;font-weight:300;margin-bottom:4px}
 .bprog{font-size:11px;color:#888780;margin-bottom:5px}
 .bbar{height:3px;background:rgba(255,255,255,0.08);border-radius:99px}
 .bfill{height:3px;border-radius:99px;transition:width .3s}
+.mprog-wrap{background:#1f1f1f;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.mprog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.mprog-label{font-size:13px;color:#888780}
+.mprog-pts{font-size:22px;font-weight:500;color:#f0efec}
+.mprog-money{font-size:13px;color:#4ecca3;font-weight:600}
+.mprog-track{height:10px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;margin-bottom:6px}
+.mprog-fill{height:10px;border-radius:99px;background:linear-gradient(90deg,#0F6E56,#4ecca3);transition:width .4s ease}
+.mprog-ticks{display:flex;justify-content:space-between;font-size:10px;color:#555}
+.reset-confirm{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;padding:24px}
+.reset-confirm.show{display:flex}
+.reset-box{background:#1f1f1f;border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:24px;max-width:320px;width:100%}
+.reset-box h2{font-size:18px;font-weight:500;margin-bottom:10px;color:#f0efec}
+.reset-box p{font-size:13px;color:#888780;margin-bottom:20px;line-height:1.6}
+.reset-box p strong{color:#f0efec}
+.reset-input{width:100%;background:#141414;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px;color:#f0efec;font-size:16px;font-family:inherit;margin-bottom:16px;text-align:center;letter-spacing:3px;box-sizing:border-box}
+.reset-input:focus{outline:none;border-color:#f87171}
+.reset-btns{display:flex;gap:10px}
+.reset-cancel{flex:1;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px;color:#f0efec;font-size:14px;cursor:pointer;font-family:inherit}
+.reset-go{flex:1;background:#7f1d1d;border:1px solid #991b1b;border-radius:8px;padding:12px;color:#f87171;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;opacity:.35;transition:opacity .2s;pointer-events:none}
+.reset-go.active{opacity:1;pointer-events:auto}
 .bpts{font-size:13px;font-weight:600;white-space:nowrap}
 .logbtn{font-size:12px;padding:6px 12px;border-radius:8px;font-family:inherit;font-weight:500;cursor:pointer}
 .clmbtn{background:#0F6E56;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
@@ -104,6 +124,17 @@ select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:
     <div class="mprog-top">
       <div>
         <div class="mprog-label">This month's progress</div>
+        <div class="mprog-pts"><span id="mprog-pts">0</span> <span style="font-size:14px;color:#888780">pts</span></div>
+      </div>
+      <div class="mprog-money" id="mprog-money">₪0.00</div>
+    </div>
+    <div class="mprog-track"><div class="mprog-fill" id="mprog-fill" style="width:0%"></div></div>
+    <div class="mprog-ticks"><span>0</span><span id="mprog-mid"></span><span id="mprog-goal"></span></div>
+  </div>
+  <div class="mprog-wrap">
+    <div class="mprog-top">
+      <div>
+        <div class="mprog-label">This month</div>
         <div class="mprog-pts"><span id="mprog-pts">0</span> <span style="font-size:14px;color:#888780">pts</span></div>
       </div>
       <div class="mprog-money" id="mprog-money">₪0.00</div>
@@ -203,6 +234,16 @@ select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:
       <button onclick="addCustom('meditation')">+</button>
     </div>
   </div>
+  <div class="card">
+    <div class="chead"><div class="cico" style="background:#2a1a2e">🧠</div><div><div class="cname">Therapy &amp; Treatment</div><div class="cpts" id="cp-therapy">0 pts earned</div></div></div>
+    <div class="prow"><button class="pbtn" onclick="add('therapy','Therapy / treatment session',4,this)">Therapy / treatment session</button><span class="ptag" style="background:#2a1a2e;color:#c084fc">+4</span></div>
+    <div class="custrow"><input type="text" id="ct-therapy" placeholder="Other win…"/><input type="number" id="cp2-therapy" value="1" min="1"/><button onclick="addCustom('therapy')">+</button></div>
+  </div>
+  <div class="card">
+    <div class="chead"><div class="cico" style="background:#1a2a2a">🧘</div><div><div class="cname">Meditation</div><div class="cpts" id="cp-meditation">0 pts earned</div></div></div>
+    <div class="prow"><button class="pbtn" onclick="add('meditation','Meditated today',2,this)">Meditated today</button><span class="ptag" style="background:#1a2a2a;color:#5eead4">+2</span></div>
+    <div class="custrow"><input type="text" id="ct-meditation" placeholder="Other win…"/><input type="number" id="cp2-meditation" value="1" min="1"/><button onclick="addCustom('meditation')">+</button></div>
+  </div>
 </div>
 
 <!-- BONUSES -->
@@ -295,6 +336,8 @@ var CATS = {
   nutrition: {name:'Nutrition',       color:'#854F0B',bg:'#2e1f08',tc:'#e8a44a'},
   creativity:{name:'Creativity',      color:'#534AB7',bg:'#1e1b3a',tc:'#9b93f5'},
   life:      {name:'Basic functioning',color:'#185FA5',bg:'#0d2035',tc:'#5aaaf5'},
+  therapy:   {name:'Therapy & Treatment',color:'#7c3aed',bg:'#2a1a2e',tc:'#c084fc'},
+  meditation:{name:'Meditation',color:'#0d9488',bg:'#1a2a2a',tc:'#5eead4'},
   therapy:   {name:'Therapy & Treatment',color:'#7c3aed',bg:'#2a1a2e',tc:'#c084fc'},
   meditation:{name:'Meditation',color:'#0d9488',bg:'#1a2a2a',tc:'#5eead4'}
 };
