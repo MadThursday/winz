@@ -120,28 +120,6 @@ select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:
     <div class="tile"><div class="tlbl">Day streak</div><div class="tval" id="s-streak">0</div></div>
     <div class="tile"><div class="tlbl">Bonus earned</div><div class="tval green" id="s-money">₪0.00</div></div>
   </div>
-  <div class="mprog-wrap">
-    <div class="mprog-top">
-      <div>
-        <div class="mprog-label">This month's progress</div>
-        <div class="mprog-pts"><span id="mprog-pts">0</span> <span style="font-size:14px;color:#888780">pts</span></div>
-      </div>
-      <div class="mprog-money" id="mprog-money">₪0.00</div>
-    </div>
-    <div class="mprog-track"><div class="mprog-fill" id="mprog-fill" style="width:0%"></div></div>
-    <div class="mprog-ticks"><span>0</span><span id="mprog-mid"></span><span id="mprog-goal"></span></div>
-  </div>
-  <div class="mprog-wrap">
-    <div class="mprog-top">
-      <div>
-        <div class="mprog-label">This month</div>
-        <div class="mprog-pts"><span id="mprog-pts">0</span> <span style="font-size:14px;color:#888780">pts</span></div>
-      </div>
-      <div class="mprog-money" id="mprog-money">₪0.00</div>
-    </div>
-    <div class="mprog-track"><div class="mprog-fill" id="mprog-fill" style="width:0%"></div></div>
-    <div class="mprog-ticks"><span>0</span><span id="mprog-mid"></span><span id="mprog-goal"></span></div>
-  </div>
   <div class="ratebar">
     <span>1 point =</span>
     <input type="number" id="rate-inp" value="1" min="0.01" step="0.01" oninput="setRate(this.value)"/>
@@ -234,16 +212,7 @@ select{background:#1f1f1f;border:1px solid rgba(255,255,255,0.12);border-radius:
       <button onclick="addCustom('meditation')">+</button>
     </div>
   </div>
-  <div class="card">
-    <div class="chead"><div class="cico" style="background:#2a1a2e">🧠</div><div><div class="cname">Therapy &amp; Treatment</div><div class="cpts" id="cp-therapy">0 pts earned</div></div></div>
-    <div class="prow"><button class="pbtn" onclick="add('therapy','Therapy / treatment session',4,this)">Therapy / treatment session</button><span class="ptag" style="background:#2a1a2e;color:#c084fc">+4</span></div>
-    <div class="custrow"><input type="text" id="ct-therapy" placeholder="Other win…"/><input type="number" id="cp2-therapy" value="1" min="1"/><button onclick="addCustom('therapy')">+</button></div>
-  </div>
-  <div class="card">
-    <div class="chead"><div class="cico" style="background:#1a2a2a">🧘</div><div><div class="cname">Meditation</div><div class="cpts" id="cp-meditation">0 pts earned</div></div></div>
-    <div class="prow"><button class="pbtn" onclick="add('meditation','Meditated today',2,this)">Meditated today</button><span class="ptag" style="background:#1a2a2a;color:#5eead4">+2</span></div>
-    <div class="custrow"><input type="text" id="ct-meditation" placeholder="Other win…"/><input type="number" id="cp2-meditation" value="1" min="1"/><button onclick="addCustom('meditation')">+</button></div>
-  </div>
+
 </div>
 
 <!-- BONUSES -->
